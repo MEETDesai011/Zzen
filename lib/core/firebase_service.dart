@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'constants.dart';
 
 class FirebaseService {
@@ -16,13 +17,61 @@ class FirebaseService {
 
   String? _uid;
 
-  /// The current user's UID (set after signInAnonymously)
+  /// The current user's UID (set after signInAnonymously or signInWithGoogle)
   String get uid => _uid ?? _auth.currentUser?.uid ?? '';
 
   FirebaseFirestore get firestore => _firestore;
 
+  /// Sign in using Google Sign-In.
+  Future<UserCredential?> signInWithGoogle() async {
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      
+      if (googleUser == null) {
+        // User cancelled the sign-in
+        return null;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential = await _auth.signInWithCredential(credential);
+      _uid = userCredential.user?.uid;
+
+      if (_uid != null) {
+        await _secureStorage.write(key: ZzenConstants.prefUid, value: _uid!);
+        await _createUserProfile(_uid!);
+      }
+      return userCredential;
+    } catch (e) {
+      if (kDebugMode) debugPrint('Google Sign-In error: $e');
+      rethrow;
+    }
+  }
+
+  /// Sign out the current user.
+  Future<void> signOut() async {
+    try {
+      await _auth.signOut();
+      try {
+        await GoogleSignIn().signOut();
+      } catch (e) {
+        if (kDebugMode) debugPrint('Google API Sign-out error (possibly not initialized): $e');
+      }
+      await _secureStorage.delete(key: ZzenConstants.prefUid);
+      _uid = null;
+    } catch (e) {
+      if (kDebugMode) debugPrint('Sign out error: $e');
+      rethrow;
+    }
+  }
+
   /// Sign in anonymously on first launch.
-  /// UID is persisted in SharedPreferences so the same user is used across sessions.
+  /// UID is persisted in secure storage so the same user is used across sessions.
   Future<void> signInAnonymously() async {
     try {
       final savedUid = await _secureStorage.read(key: ZzenConstants.prefUid);

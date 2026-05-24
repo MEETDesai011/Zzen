@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../core/theme.dart';
 import '../core/constants.dart';
+import '../core/firebase_service.dart';
 import '../services/notification_service.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -25,6 +26,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     _loadSettings();
+  }
+
+  Future<void> _handleSignOut() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: ZzenTheme.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Log Out', style: TextStyle(color: ZzenTheme.textPrimary, fontWeight: FontWeight.w700)),
+        content: const Text('Are you sure you want to log out? Your local preferences and settings will be reset.', style: TextStyle(color: ZzenTheme.textSecondary)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel', style: TextStyle(color: ZzenTheme.textSecondary)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: ZzenTheme.error),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Log Out'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && mounted) {
+      setState(() => _saving = true);
+      try {
+        await FirebaseService.instance.signOut();
+        if (mounted) {
+          Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Failed to sign out: $e'),
+            backgroundColor: ZzenTheme.error,
+          ));
+        }
+      } finally {
+        if (mounted) setState(() => _saving = false);
+      }
+    }
   }
 
   Future<void> _loadSettings() async {
@@ -194,6 +237,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
               subtitle: 'Daily reminder at 9 PM to log your habits',
               value: _habitReminderEnabled,
               onChanged: (v) => setState(() => _habitReminderEnabled = v),
+            ),
+            const SizedBox(height: 24),
+
+            // Account section
+            _sectionHeader('👤 Account'),
+            const SizedBox(height: 12),
+            _buildActionTile(
+              icon: Icons.logout_rounded,
+              title: 'Log Out',
+              subtitle: 'Sign out of your account',
+              onTap: _handleSignOut,
             ),
             const SizedBox(height: 32),
 

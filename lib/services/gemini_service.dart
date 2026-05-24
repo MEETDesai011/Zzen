@@ -2,6 +2,7 @@
 // SDG 3 Impact: AI-powered personalised sleep coaching supports evidence-based
 // behaviour change for improved health outcomes (SDG 3.4).
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import '../core/constants.dart';
 import '../models/sleep_entry.dart';
@@ -17,9 +18,14 @@ class GeminiService {
   GenerativeModel _getModel() {
     if (_model != null) return _model!;
 
-    const apiKey = String.fromEnvironment('GEMINI_API_KEY');
+    // Cascade: 1. Try to read from flutter_dotenv. 2. Fall back to compile-time environment variables
+    String apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+    if (apiKey.isEmpty) {
+      apiKey = const String.fromEnvironment('GEMINI_API_KEY');
+    }
+
     if (apiKey.isEmpty || apiKey == 'your_gemini_api_key_here') {
-      throw Exception('GEMINI_API_KEY not set in build arguments');
+      throw Exception('GEMINI_API_KEY not set in .env file or build arguments');
     }
 
     _model = GenerativeModel(
@@ -110,6 +116,10 @@ class GeminiService {
       return text;
     } catch (e) {
       if (kDebugMode) debugPrint('Gemini error: $e');
+      final errorStr = e.toString().toLowerCase();
+      if (errorStr.contains('quota') || errorStr.contains('429') || errorStr.contains('limit') || errorStr.contains('resource_exhausted')) {
+        return 'AI Coach limit reached. Please try again later or upgrade in the future! 🚀';
+      }
       return 'Coach is unavailable right now 😴';
     }
   }
@@ -131,6 +141,10 @@ class GeminiService {
       return response.text ?? 'Keep up the good sleep habits! 🌙';
     } catch (e) {
       if (kDebugMode) debugPrint('Weekly insight error: $e');
+      final errorStr = e.toString().toLowerCase();
+      if (errorStr.contains('quota') || errorStr.contains('429') || errorStr.contains('limit') || errorStr.contains('resource_exhausted')) {
+        return 'AI Coach limit reached. Check back later!';
+      }
       return 'Track more nights to unlock AI insights! 💤';
     }
   }

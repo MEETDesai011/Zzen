@@ -40,6 +40,8 @@ dependencies:
   app_usage: ^3.0.1
 
   # Environment variables
+  flutter_dotenv: ^5.1.0
+  google_sign_in: ^6.2.1
 
   # Fonts
   google_fonts: ^6.2.1
@@ -69,6 +71,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - .env
     - assets/sounds/white_noise.mp3
     - assets/sounds/rain.mp3
     - assets/sounds/ocean.mp3

@@ -3,6 +3,7 @@
 // making holistic wellbeing tools accessible to Gen-Z users.
 import 'package:flutter/material.dart';
 import 'core/theme.dart';
+import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/log_sleep_screen.dart';
 import 'screens/coach_screen.dart';
@@ -14,7 +15,8 @@ import 'screens/settings_screen.dart';
 import 'screens/report_screen.dart';
 
 class ZzenApp extends StatelessWidget {
-  const ZzenApp({super.key});
+  final Widget homeScreen;
+  const ZzenApp({super.key, required this.homeScreen});
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +24,10 @@ class ZzenApp extends StatelessWidget {
       title: 'Zzen',
       debugShowCheckedModeBanner: false,
       theme: ZzenTheme.darkTheme,
-      home: const MainNavigator(),
+      home: homeScreen,
       routes: {
-        '/home': (context) => const HomeScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/home': (context) => const MainNavigator(),
         '/log': (context) => const LogSleepScreen(),
         '/coach': (context) => const CoachScreen(),
         '/sounds': (context) => const SoundsScreen(),
