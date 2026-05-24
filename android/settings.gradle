@@ -1,0 +1,22 @@
+include ':app'
+
+def flutterSdkPath = {
+    def properties = new Properties()
+    file("local.properties").withInputStream { properties.load(it) }
+    def flutterSdkPath = properties.getProperty("flutter.sdk")
+    assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+    return flutterSdkPath
+}()
+
+buildscript {
+    repositories {
+        maven {
+            url "https://storage.googleapis.com/download.flutter.io"
+        }
+    }
+    dependencies {
+        classpath "dev.flutter:flutter-gradle-plugin:1.0.0"
+    }
+}
+
+apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"

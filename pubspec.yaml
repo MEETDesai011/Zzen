@@ -1,0 +1,79 @@
+name: zzen
+description: Zzen - Gen-Z Sleep Improvement App. SDG 3 Good Health and Well-being.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Firebase
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.1
+  cloud_firestore: ^5.4.4
+
+  # AI
+  google_generative_ai: ^0.4.6
+
+  # Notifications
+  flutter_local_notifications: ^18.0.1
+
+  # Timezone for scheduled notifications
+  timezone: ^0.9.4
+
+  # Local storage
+  shared_preferences: ^2.3.2
+
+  # Charts
+  fl_chart: ^0.69.0
+
+  # Audio
+  audioplayers: ^6.1.0
+
+  # Permissions
+  permission_handler: ^11.3.1
+
+  # Screen time
+  app_usage: ^3.0.1
+
+  # Environment variables
+  flutter_dotenv: ^5.2.1
+
+  # Fonts
+  google_fonts: ^6.2.1
+
+  # URL launcher
+  url_launcher: ^6.3.1
+
+  # Share
+  share_plus: ^10.1.2
+
+  # Temp directory for screenshot export
+  path_provider: ^2.1.4
+
+  # Screenshot
+  screenshot: ^3.0.0
+
+  # Cupertino icons
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - .env
+    - assets/sounds/white_noise.mp3
+    - assets/sounds/rain.mp3
+    - assets/sounds/ocean.mp3
+    - assets/sounds/lofi.mp3
+    - assets/sounds/forest.mp3
+
+  # Fonts are loaded via google_fonts package — no local font files needed

@@ -1,0 +1,14 @@
+// Google Services placeholder
+// ⚠️ DEVELOPER: Replace this file with your real google-services.json
+// from Firebase Console → Project Settings → Your Android App
+// This file is required for Firebase Auth and Firestore to work.
+// It is excluded from git via .gitignore for security.
+//
+// Steps:
+// 1. Go to https://console.firebase.google.com
+// 2. Create a new project or use existing
+// 3. Add Android app with package: com.zzen.zzen
+// 4. Download google-services.json
+// 5. Place in: android/app/google-services.json
+// 6. Enable Anonymous Auth in Firebase Console → Authentication
+// 7. Enable Firestore in Firebase Console → Firestore Database
