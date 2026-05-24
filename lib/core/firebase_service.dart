@@ -3,7 +3,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'constants.dart';
 
 class FirebaseService {
@@ -12,6 +12,7 @@ class FirebaseService {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   String? _uid;
 
@@ -24,8 +25,7 @@ class FirebaseService {
   /// UID is persisted in SharedPreferences so the same user is used across sessions.
   Future<void> signInAnonymously() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final savedUid = prefs.getString(ZzenConstants.prefUid);
+      final savedUid = await _secureStorage.read(key: ZzenConstants.prefUid);
 
       // Check if we already have a logged-in user
       if (_auth.currentUser != null) {
@@ -37,9 +37,9 @@ class FirebaseService {
       final credential = await _auth.signInAnonymously();
       _uid = credential.user?.uid;
 
-      // Persist UID
+      // Persist UID securely
       if (_uid != null) {
-        await prefs.setString(ZzenConstants.prefUid, _uid!);
+        await _secureStorage.write(key: ZzenConstants.prefUid, value: _uid!);
       }
 
       // Create user profile doc if it doesn't exist
@@ -48,7 +48,7 @@ class FirebaseService {
       }
     } catch (e) {
       // If anonymous auth fails, continue — Firestore writes will fail gracefully
-      debugPrint('Anonymous auth error: $e');
+      if (kDebugMode) debugPrint('Anonymous auth error: $e');
     }
   }
 
@@ -63,7 +63,7 @@ class FirebaseService {
         });
       }
     } catch (e) {
-      debugPrint('Profile creation error: $e');
+      if (kDebugMode) debugPrint('Profile creation error: $e');
     }
   }
 
@@ -87,7 +87,7 @@ class FirebaseService {
     try {
       await userSettingsDoc.update({'streakCount': streak});
     } catch (e) {
-      debugPrint('Streak update error: $e');
+      if (kDebugMode) debugPrint('Streak update error: $e');
     }
   }
 
@@ -99,7 +99,7 @@ class FirebaseService {
         return (doc.data()?['streakCount'] as int?) ?? 0;
       }
     } catch (e) {
-      debugPrint('Get streak error: $e');
+      if (kDebugMode) debugPrint('Get streak error: $e');
     }
     return 0;
   }

@@ -40,7 +40,6 @@ dependencies:
   app_usage: ^3.0.1
 
   # Environment variables
-  flutter_dotenv: ^5.2.1
 
   # Fonts
   google_fonts: ^6.2.1
@@ -59,6 +58,7 @@ dependencies:
 
   # Cupertino icons
   cupertino_icons: ^1.0.8
+  flutter_secure_storage: ^10.3.0
 
 dev_dependencies:
   flutter_test:
@@ -69,7 +69,6 @@ flutter:
   uses-material-design: true
 
   assets:
-    - .env
     - assets/sounds/white_noise.mp3
     - assets/sounds/rain.mp3
     - assets/sounds/ocean.mp3

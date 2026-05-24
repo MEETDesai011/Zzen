@@ -3,7 +3,6 @@
 // Gen-Z users, directly contributing to SDG 3.4 (reduce premature mortality
 // from non-communicable diseases linked to poor sleep health).
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'core/firebase_service.dart';
@@ -14,9 +13,6 @@ void main() async {
 
   // Initialise timezone data (required for scheduled notifications)
   tz.initializeTimeZones();
-
-  // Load environment variables (Gemini API key, etc.)
-  await dotenv.load(fileName: '.env');
 
   // Initialise Firebase
   await Firebase.initializeApp();

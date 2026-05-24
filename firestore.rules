@@ -3,8 +3,25 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // Users can only read/write their own data
     // Anonymous auth is used — uid comes from Firebase Auth
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId
+                   && request.resource.data.size() <= 10;
+      
+      match /sleep_entries/{entryId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow write: if request.auth != null && request.auth.uid == userId
+                     && request.resource.data.keys().hasAny(['sleepTime', 'wakeTime', 'score', 'durationHours', 'date'])
+                     && request.resource.data.score >= 0
+                     && request.resource.data.score <= 100
+                     && request.resource.data.size() <= 15;
+      }
+      
+      match /{document=**} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow write: if request.auth != null && request.auth.uid == userId
+                     && request.resource.data.size() <= 20;
+      }
     }
   }
 }

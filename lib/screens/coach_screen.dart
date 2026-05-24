@@ -22,6 +22,7 @@ class _CoachScreenState extends State<CoachScreen> {
   bool _loadingEntries = true;
   bool _sending = false;
   bool _firstMessage = true;
+  DateTime? _lastMessageTime;
 
   @override
   void initState() {
@@ -92,6 +93,19 @@ class _CoachScreenState extends State<CoachScreen> {
   Future<void> _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty || _sending) return;
+
+    // Rate limiting: 2 seconds cooldown
+    if (_lastMessageTime != null) {
+      final diff = DateTime.now().difference(_lastMessageTime!);
+      if (diff.inSeconds < 2) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Please wait a moment before sending another message.'),
+          behavior: SnackBarBehavior.floating,
+        ));
+        return;
+      }
+    }
+    _lastMessageTime = DateTime.now();
 
     _controller.clear();
     _addUserMessage(text);
@@ -190,6 +204,7 @@ class _CoachScreenState extends State<CoachScreen> {
           Expanded(
             child: TextField(
               controller: _controller,
+              maxLength: 500,
               style: const TextStyle(color: ZzenTheme.textPrimary),
               decoration: InputDecoration(
                 hintText: 'Ask your sleep coach...',

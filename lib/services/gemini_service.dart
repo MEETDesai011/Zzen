@@ -3,7 +3,6 @@
 // behaviour change for improved health outcomes (SDG 3.4).
 import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../core/constants.dart';
 import '../models/sleep_entry.dart';
 
@@ -18,9 +17,9 @@ class GeminiService {
   GenerativeModel _getModel() {
     if (_model != null) return _model!;
 
-    final apiKey = dotenv.env['GEMINI_API_KEY'];
-    if (apiKey == null || apiKey.isEmpty || apiKey == 'your_gemini_api_key_here') {
-      throw Exception('GEMINI_API_KEY not set in .env file');
+    const apiKey = String.fromEnvironment('GEMINI_API_KEY');
+    if (apiKey.isEmpty || apiKey == 'your_gemini_api_key_here') {
+      throw Exception('GEMINI_API_KEY not set in build arguments');
     }
 
     _model = GenerativeModel(
@@ -75,6 +74,13 @@ class GeminiService {
     return sb.toString();
   }
 
+  // Sanitize and constrain user input to prevent prompt injection
+  String _sanitizeInput(String input) {
+    if (input.length > 500) input = input.substring(0, 500);
+    input = input.replaceAll(RegExp(r'ignore.*instructions', caseSensitive: false), '');
+    return input.trim();
+  }
+
   /// Send a message to the AI coach and get a response
   /// [sleepEntries] is used on first message to build context
   Future<String> sendMessage({
@@ -91,8 +97,10 @@ class GeminiService {
         session = _chatSession!;
       }
 
+      final sanitizedMessage = _sanitizeInput(userMessage);
+
       final response = await session.sendMessage(
-        Content.text(userMessage),
+        Content.text(sanitizedMessage),
       );
 
       final text = response.text;
@@ -101,7 +109,7 @@ class GeminiService {
       }
       return text;
     } catch (e) {
-      debugPrint('Gemini error: $e');
+      if (kDebugMode) debugPrint('Gemini error: $e');
       return 'Coach is unavailable right now 😴';
     }
   }
@@ -122,7 +130,7 @@ class GeminiService {
 
       return response.text ?? 'Keep up the good sleep habits! 🌙';
     } catch (e) {
-      debugPrint('Weekly insight error: $e');
+      if (kDebugMode) debugPrint('Weekly insight error: $e');
       return 'Track more nights to unlock AI insights! 💤';
     }
   }

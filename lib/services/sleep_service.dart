@@ -105,7 +105,7 @@ class SleepService {
 
       return entry.copyWith(id: docRef.id);
     } catch (e) {
-      debugPrint('Log sleep error: $e');
+      if (kDebugMode) debugPrint('Log sleep error: $e');
       rethrow;
     }
   }
@@ -126,7 +126,7 @@ class SleepService {
           .map((doc) => SleepEntry.fromFirestore(doc))
           .toList();
     } catch (e) {
-      debugPrint('Get last 7 days error: $e');
+      if (kDebugMode) debugPrint('Get last 7 days error: $e');
       return [];
     }
   }
@@ -148,7 +148,7 @@ class SleepService {
       if (snapshot.docs.isEmpty) return null;
       return SleepEntry.fromFirestore(snapshot.docs.first);
     } catch (e) {
-      debugPrint('Get today entry error: $e');
+      if (kDebugMode) debugPrint('Get today entry error: $e');
       return null;
     }
   }
@@ -165,7 +165,7 @@ class SleepService {
       }
       return debt.clamp(0, ZzenConstants.maxSleepDebtHours);
     } catch (e) {
-      debugPrint('Get sleep debt error: $e');
+      if (kDebugMode) debugPrint('Get sleep debt error: $e');
       return 0;
     }
   }
@@ -178,7 +178,7 @@ class SleepService {
           .doc(id)
           .delete();
     } catch (e) {
-      debugPrint('Delete entry error: $e');
+      if (kDebugMode) debugPrint('Delete entry error: $e');
     }
   }
 
