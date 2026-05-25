@@ -1,18 +1,3 @@
-buildscript {
-    ext.kotlin_version = '1.9.10'
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.1.0'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        // Google Services plugin for Firebase
-        classpath 'com.google.gms:google-services:4.4.0'
-    }
-}
-
 allprojects {
     repositories {
         google()
@@ -21,13 +6,46 @@ allprojects {
 }
 
 rootProject.buildDir = '../build'
-
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
-
 subprojects {
     project.evaluationDependsOn(':app')
+}
+
+// Dynamic namespace injection script for third-party libraries lacking AGP 8.0+ compliance
+subprojects { project ->
+    def setNamespace = {
+        if (project.hasProperty("android")) {
+            if (project.android.namespace == null) {
+                project.android.namespace = "dev.flutter.plugins.${project.name.replaceAll('[^a-zA-Z0-9_]', '_')}"
+            }
+        }
+    }
+    if (project.state.executed) {
+        setNamespace()
+    } else {
+        project.afterEvaluate {
+            setNamespace()
+        }
+    }
+}
+
+// Fix: Override Kotlin JVM target for all plugins (app_usage compatibility)
+subprojects {
+    afterEvaluate { project ->
+        if (project.plugins.hasPlugin("kotlin-android") || project.plugins.hasPlugin("org.jetbrains.kotlin.android")) {
+            project.android {
+                kotlinOptions {
+                    jvmTarget = "17"
+                }
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_17
+                    targetCompatibility JavaVersion.VERSION_17
+                }
+            }
+        }
+    }
 }
 
 tasks.register("clean", Delete) {

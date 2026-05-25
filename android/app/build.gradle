@@ -26,16 +26,16 @@ if (flutterVersionName == null) {
 
 android {
     namespace "com.zzen.zzen"
-    compileSdk flutter.compileSdkVersion
+    compileSdk 36 // Update to latest compileSdkVersion
     ndkVersion flutter.ndkVersion
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+    
+    compileOptions { // Found Java 17 compatibility for all modules
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = '1.8'
+    kotlinOptions { //version 1.8 changed to Java 17
+    jvmTarget = '17'
     }
 
     sourceSets {
@@ -66,7 +66,6 @@ flutter {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     // Firebase BOM — manages all Firebase dependency versions
     implementation platform('com.google.firebase:firebase-bom:32.7.0')
     implementation 'com.google.firebase:firebase-analytics'
