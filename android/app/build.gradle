@@ -29,9 +29,10 @@ android {
     compileSdk 36 // Update to latest compileSdkVersion
     ndkVersion flutter.ndkVersion
     
-    compileOptions { // Found Java 17 compatibility for all modules
-    sourceCompatibility JavaVersion.VERSION_17
-    targetCompatibility JavaVersion.VERSION_17
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions { //version 1.8 changed to Java 17
@@ -44,8 +45,8 @@ android {
 
     defaultConfig {
         applicationId "com.zzen.zzen"
-        // app_usage requires minSdkVersion 21+
-        minSdkVersion 21
+        // app_usage requires minSdkVersion 21+, flutter_secure_storage requires 23+
+        minSdkVersion 23
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -66,6 +67,7 @@ flutter {
 }
 
 dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
     // Firebase BOM — manages all Firebase dependency versions
     implementation platform('com.google.firebase:firebase-bom:32.7.0')
     implementation 'com.google.firebase:firebase-analytics'

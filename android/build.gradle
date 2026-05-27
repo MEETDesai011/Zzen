@@ -13,27 +13,29 @@ subprojects {
     project.evaluationDependsOn(':app')
 }
 
-// Dynamic namespace injection script for third-party libraries lacking AGP 8.0+ compliance
+// Dynamic configuration script for third-party libraries (namespace injection + manifest patch + JVM override)
 subprojects { project ->
-    def setNamespace = {
+    def configureProject = {
         if (project.hasProperty("android")) {
             if (project.android.namespace == null) {
                 project.android.namespace = "dev.flutter.plugins.${project.name.replaceAll('[^a-zA-Z0-9_]', '_')}"
             }
-        }
-    }
-    if (project.state.executed) {
-        setNamespace()
-    } else {
-        project.afterEvaluate {
-            setNamespace()
-        }
-    }
-}
 
-// Fix: Override Kotlin JVM target for all plugins (app_usage compatibility)
-subprojects {
-    afterEvaluate { project ->
+            // Remove obsolete 'package' attribute from manifest to comply with AGP 8.0+ namespace settings
+            try {
+                def manifestFile = project.file("src/main/AndroidManifest.xml")
+                if (manifestFile.exists()) {
+                    def contents = manifestFile.text
+                    if (contents.contains("package=")) {
+                        contents = contents.replaceAll(/package\s*=\s*"[^"]*"/, "")
+                        contents = contents.replaceAll(/package\s*=\s*'[^']*'/, "")
+                        manifestFile.text = contents
+                    }
+                }
+            } catch (Exception e) {
+                logger.warn("Failed to patch manifest for ${project.name}: ${e.message}")
+            }
+        }
         if (project.plugins.hasPlugin("kotlin-android") || project.plugins.hasPlugin("org.jetbrains.kotlin.android")) {
             project.android {
                 kotlinOptions {
@@ -44,6 +46,13 @@ subprojects {
                     targetCompatibility JavaVersion.VERSION_17
                 }
             }
+        }
+    }
+    if (project.state.executed) {
+        configureProject()
+    } else {
+        project.afterEvaluate {
+            configureProject()
         }
     }
 }
